@@ -133,12 +133,21 @@ if (IDA_ENABLE_QT_SUPPORT)
 
         # On Windows, we hack Qt's "IMPLIB"s, on unix the .so location.
         if (${CMAKE_SYSTEM_NAME} STREQUAL "Windows")
-            set(lib_property "IMPORTED_IMPLIB_RELEASE")
+            if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+                set(lib_property "IMPORTED_IMPLIB_DEBUG")
+            else()
+                set(lib_property "IMPORTED_IMPLIB_RELEASE")
+            endif()
         else ()
-            set(lib_property "IMPORTED_LOCATION_RELEASE")
+            if (CMAKE_BUILD_TYPE STREQUAL "Debug")
+                set(lib_property "IMPORTED_LOCATION_DEBUG")
+            else()
+                set(lib_property "IMPORTED_LOCATION_RELEASE")
+            endif()
         endif ()
 
         foreach (cur_lib ${ida_qt_libs})
+            #message(STATUS "IDA_Qt${cur_lib}_LIBRARY: ${IDA_Qt${cur_lib}_LIBRARY}")
             set_target_properties(
                 "Qt5::${cur_lib}"
                 PROPERTIES 
@@ -268,7 +277,7 @@ function (add_ida_plugin plugin_name)
             idaq_exe_native_path)
         configure_file(
             "${ida_cmakelist_path}/template.vcxproj.user" 
-            "${plugin_name}.vcxproj.user" 
+            "${plugin_name}.vcxproj.user"
             @ONLY)
     endif ()
 endfunction (add_ida_plugin)
@@ -306,12 +315,13 @@ function (add_ida_qt_plugin plugin_name)
 
     # Link against Qt.
     foreach (qtlib Core;Gui;Widgets)
-        if (DEFINED IDA_QtCore_LIBRARY)
-            set_target_properties(
-                "Qt5::${qtlib}"
-                PROPERTIES 
-                IMPORTED_LOCATION_RELEASE "${IDA_Qt${qtlib}_LIBRARY}")
-        endif ()
+        #if (DEFINED IDA_QtCore_LIBRARY)
+        #    set_target_properties(
+        #        "Qt5::${qtlib}"
+        #        PROPERTIES 
+        #        IMPORTED_LOCATION_RELEASE "${IDA_Qt${qtlib}_LIBRARY}")
+        #endif ()
+
         target_link_libraries(${CMAKE_PROJECT_NAME} "Qt5::${qtlib}")
     endforeach()
 endfunction ()
